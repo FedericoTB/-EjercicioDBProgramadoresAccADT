@@ -50,6 +50,24 @@ public class Programmer {
     public void setDepartment(long department) { this.department = department;}
 
     public List<String> getLanguages() { return languages;}
-
+    public String getLanguagesToString() {
+        String lang="";
+        for(int i = 0; i< this.languages.size();i++) {
+            if(i<this.languages.size()) lang+=this.languages.get(i)+";";
+            else lang+=this.languages.get(i);
+        }
+        return lang;}
     public void setLanguages(List<String> languages) { this.languages = languages;}
+
+    @Override
+    public String toString() {
+        return "Programmer{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", years=" + years +
+                ", salary=" + salary +
+                ", department=" + department +
+                ", languages=" + languages +
+                '}';
+    }
 }

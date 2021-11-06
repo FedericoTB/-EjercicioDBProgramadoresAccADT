@@ -56,4 +56,15 @@ public class Department {
     public void setEmploys(List<Programmer> employs) {
         this.employs = employs;
     }
+
+    @Override
+    public String toString() {
+        return "Department{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", budget=" + budget +
+                ", manager=" + manager +
+                ", employs=" + employs +
+                '}';
+    }
 }

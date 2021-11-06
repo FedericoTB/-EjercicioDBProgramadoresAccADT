@@ -13,10 +13,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DepartmentRepository {
-    private static DataBaseController db = DataBaseController.getInstance();
-    private static Optional<Department> deleteDepartment(Department department) {
-        System.out.println("Deleting Deparment with ID: " + department.getId());
-        String query = "DELETE FROM deparments WHERE id = ?";
+    public static DataBaseController db = DataBaseController.getInstance();
+    public static Optional<Department> deleteDepartment(Department department) {
+        System.out.println("Deleting Department with ID: " + department.getId());
+        String query = "DELETE FROM departments WHERE id_department = ?";
         Optional<Department> result = Optional.empty();
         try {
             db.open();
@@ -29,18 +29,18 @@ public class DepartmentRepository {
         }return result;
     }
 
-    private static Optional<Department> updateDepartment(Department department,String column) {
+    public static Optional<Department> updateDepartment(Department department,String column) {
         System.out.println("Updating Department with ID: " + department.getId());
-        String query = "UPDATE departments SET "+column+" = ?";
+        String query = "UPDATE departments SET "+column+" = ? where id_department = ?";
         DataBaseController db = DataBaseController.getInstance();
         Optional<Department> result = Optional.empty();
         try {
             db.open();
             int res = 0;
             switch(column){
-                case "name": res = db.update(query, department.getName());break;
-                case "budget": res = db.update(query, department.getBudget());break;
-                case "id_manager": res = db.update(query, department.getManager());break;
+                case "name": res = db.update(query, department.getName(),department.getId());break;
+                case "budget": res = db.update(query, department.getBudget(),department.getId());break;
+                case "id_manager": res = db.update(query, department.getManager(),department.getId());break;
                 default: System.out.println("Error at Update Deparment: not existing column passed for parameter");
             }
             db.close();
@@ -53,19 +53,19 @@ public class DepartmentRepository {
         return result;
     }
 
-    private static Optional<Department> insertDepartment(Department department) {
+    public static Optional<Department> insertDepartment(Department department) {
         System.out.println("Insert in to Department");
-        String query = "INSERT INTO departments VALUES (null, ?, ?, ?)";
+        String query = "INSERT INTO departments VALUES (?, ?, ?, ?)";
         DataBaseController db = DataBaseController.getInstance();
         Optional<Department> optionalResult = Optional.empty();
         try {
 
             db.open();
-            ResultSet result = db.insert(query, department.getName(), department.getBudget(),
+            ResultSet result = db.insert(query, department.getId(),department.getName(), department.getBudget(),
                             department.getManager())
                     .orElseThrow(() -> new SQLException("Error at insert programmer"));
             // Para obtener su ID
-            if (result.first()) {
+            if (result.next()) {
                 department.setId(result.getLong(1));
                 // una vez insertado comprobamos que esta correcto para devolverlo
                 optionalResult = Optional.of(department);
@@ -77,28 +77,28 @@ public class DepartmentRepository {
         }return optionalResult;
     }
 
-    private static Optional<Department> selectDepartmentById(int id) {
+    public static Optional<Department> selectDepartmentById(int id) {
         System.out.println("Obteniendo usuario con id: " + id);
         String queryDeparments = "SELECT * FROM departments WHERE id_department = ?";
         String queryProgrammers = "SELECT * FROM programmers WHERE id_department = ?";
         DataBaseController db = DataBaseController.getInstance();
         Optional<Department> department = Optional.empty();
-        List<Programmer> listOfProgrammers = null;
         try {
             db.open();
             ResultSet resultDeparment = db.select(queryDeparments, id).orElseThrow(() -> new SQLException("Error al consultar usuario con ID " + id));
-            ResultSet resultProgrammers = db.select(queryProgrammers, id).orElseThrow(() -> new SQLException("Error al consultar usuario con ID " + id));
+            ResultSet resultProgrammers = db.select(queryProgrammers, id).orElseThrow(() -> new SQLException("Error al consultar programmer"));
 
-            if (resultDeparment.first()) {
+            if (resultDeparment.next()) {
 
+                List<Programmer> listOfProgrammers = new ArrayList<>();
                 while (resultProgrammers.next()) {
                      listOfProgrammers.add(new Programmer(
-                            resultProgrammers.getLong("id_programmer"),
-                            resultProgrammers.getString("name"),
-                            resultProgrammers.getInt("years"),
-                            resultProgrammers.getDouble("salary"),
-                            resultProgrammers.getLong("id_manager"),
-                            Arrays.stream(resultProgrammers.getString("languages").split(";")).collect(Collectors.toList())
+                             resultProgrammers.getLong("id_programmer"),
+                             resultProgrammers.getString("name"),
+                             resultProgrammers.getInt("years"),
+                             resultProgrammers.getDouble("salary"),
+                             resultProgrammers.getLong("id_department"),
+                             Arrays.stream(resultProgrammers.getString("languages").split(";")).collect(Collectors.toList())
                     ));
                 }
                 department = Optional.of(new Department(
@@ -116,7 +116,7 @@ public class DepartmentRepository {
         }return department;
     }
 
-    private static Optional<ArrayList<Department>> selectAllDepartments() {
+    public static Optional<ArrayList<Department>> selectAllDepartments() {
         System.out.println("Obteniendo todos los Departments");
         String queryDepartments = "SELECT * FROM departments";
         String queryProgrammers = "SELECT * FROM programmers WHERE id_department = ?";
@@ -133,12 +133,12 @@ public class DepartmentRepository {
                 List<Programmer> programmersList = new ArrayList<Programmer>();
                 while(resultProgrammers.next()){
                     programmersList.add(new Programmer(
-                            result.getLong("id_programmer"),
-                            result.getString("name"),
-                            result.getInt("years"),
-                            result.getDouble("salary"),
-                            result.getLong("id_manager"),
-                            Arrays.stream(result.getString("languages").split(";")).collect(Collectors.toList())
+                            resultProgrammers.getLong("id_programmer"),
+                            resultProgrammers.getString("name"),
+                            resultProgrammers.getInt("years"),
+                            resultProgrammers.getDouble("salary"),
+                            resultProgrammers.getLong("id_department"),
+                            Arrays.stream(resultProgrammers.getString("languages").split(";")).collect(Collectors.toList())
                     ));
                 }
                 list.add(
@@ -147,7 +147,7 @@ public class DepartmentRepository {
                                 result.getString("name"),
                                 result.getDouble("budget"),
                                 result.getLong("id_manager"),
-                                new ArrayList<>()
+                                programmersList
                         )
                 );
             }

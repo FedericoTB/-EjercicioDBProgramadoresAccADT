@@ -14,8 +14,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ProgrammerRepository {
-   private static DataBaseController db = DataBaseController.getInstance();
-    private static Optional<Programmer> deleteProgrammer(Programmer programmer) {
+   public static DataBaseController db = DataBaseController.getInstance();
+    public static Optional<Programmer> deleteProgrammer(Programmer programmer) {
         System.out.println("Deleting Programmer with ID: " + programmer.getId());
         String query = "DELETE FROM programmers WHERE id_programmer = ?";
         Optional<Programmer> optionalResult = Optional.empty();
@@ -31,7 +31,7 @@ public class ProgrammerRepository {
         }return optionalResult;
     }
 
-    private static Optional<Programmer> updateProgrammer(Programmer programmer, String column) {
+    public static Optional<Programmer> updateProgrammer(Programmer programmer, String column) {
         System.out.println("Updating Programmer with ID: " + programmer.getId());
         String query = "UPDATE programmers SET "+column+" = ? WHERE id_programmer = ?";
         DataBaseController db = DataBaseController.getInstance();
@@ -44,7 +44,7 @@ public class ProgrammerRepository {
                 case "years": res = db.update(query, programmer.getYears(), programmer.getId());break;
                 case "salary": res = db.update(query, programmer.getSalary(), programmer.getId());break;
                 case "id_department": res = db.update(query, programmer.getDepartment(), programmer.getId());break;
-                default: System.out.println("Error at Update Deparment: not existing column passed for parameter");
+                default: System.out.println("Error at Update Deparment: not supported column to add passed for parameter");
             }
             db.close();
             if (res > 0)
@@ -55,19 +55,19 @@ public class ProgrammerRepository {
         }return optionalResult;
     }
 
-    private static Optional<Programmer> insertUser(Programmer programmer) {
+    public static Optional<Programmer> insertUser(Programmer programmer) {
         System.out.println("Insertando usuario");
-        String query = "INSERT INTO programmers VALUES (null, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO programmers  VALUES (?,?, ?, ?, ?, ?)";
         DataBaseController db = DataBaseController.getInstance();
         Optional<Programmer> optionalResult = Optional.empty();
         try {
 
             db.open();
-            ResultSet result = db.insert(query, programmer.getName(), programmer.getYears(),
-                    programmer.getSalary(), programmer.getDepartment(),programmer.getLanguages())
+            ResultSet result = db.insert(query, programmer.getId(),programmer.getName(), programmer.getYears(),
+                    programmer.getSalary(), programmer.getDepartment(),programmer.getLanguagesToString())
                     .orElseThrow(() -> new SQLException("Error at insert programmer"));
             // Para obtener su ID
-            if (result.first()) {
+            if (result.next()) {
                 programmer.setId(result.getLong(1));
                 optionalResult = Optional.of(programmer);
                 // una vez insertado comprobamos que esta correcto para devolverlo
@@ -79,7 +79,7 @@ public class ProgrammerRepository {
         }return optionalResult;
     }
 
-    private static Optional<Programmer> selectProgrammer(int id) {
+    public static Optional<Programmer> selectProgrammer(int id) {
         System.out.println("Obteniendo usuario con id: " + id);
         String query = "SELECT * FROM programmers WHERE id_programmer = ?";
         DataBaseController db = DataBaseController.getInstance();
@@ -88,14 +88,14 @@ public class ProgrammerRepository {
             db.open();
             ResultSet result = db.select(query, id).orElseThrow(() -> new SQLException("Error al consultar usuario con ID " + id));
 
-            if (result.first()) {
+            if (result.next()) {
 
                 Programmer programmer = new Programmer(
                         result.getLong("id_programmer"),
                         result.getString("name"),
                         result.getInt("years"),
                         result.getDouble("salary"),
-                        result.getLong("id_manager"),
+                        result.getLong("id_department"),
                         Arrays.stream(result.getString("languages").split(";")).collect(Collectors.toList())
                 );
                 optionalResult = Optional.of(programmer);
@@ -107,7 +107,7 @@ public class ProgrammerRepository {
         }return optionalResult;
     }
 
-    private static Optional<ArrayList<Programmer>> selectAllUsers() {
+    public static Optional<ArrayList<Programmer>> selectAllUsers() {
         System.out.println("Obteniendo todos los usuarios");
         String query = "SELECT * FROM programmers";
         DataBaseController db = DataBaseController.getInstance();
@@ -124,7 +124,7 @@ public class ProgrammerRepository {
                                 result.getString("name"),
                                 result.getInt("years"),
                                 result.getDouble("salary"),
-                                result.getLong("id_manager"),
+                                result.getLong("id_department"),
                                 Arrays.stream(result.getString("languages").split(";")).collect(Collectors.toList())
                         )
                 );

@@ -6,13 +6,14 @@ public class Department {
     private long id;
     private String name;
     private double budget;
-    private Programmer manager;
+    private long manager;
     private List<Programmer> employs;
 
-    public Department(long id, String name, Programmer manager, List<Programmer> employs) {
+    public Department(long id, String name, double budget, long manager, List<Programmer> employs) {
         this.id = id;
         this.name = name;
-        if(!employs.contains(manager)) this.manager = manager;
+        this.budget = budget;
+        this.manager = manager;
         this.employs = employs;
     }
 
@@ -32,11 +33,11 @@ public class Department {
         this.name = name;
     }
 
-    public Programmer getManager() {
+    public long getManager() {
         return manager;
     }
 
-    public void setManager(Programmer manager) {
+    public void setManager(long manager) {
         if(!employs.contains(manager)) this.manager = manager;
     }
 

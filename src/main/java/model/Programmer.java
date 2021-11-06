@@ -7,10 +7,10 @@ public class Programmer {
     private String name;
     private int years;
     private double salary;
-    private Department department;
-    private List<Languages> languages;
+    private long department;
+    private List<String> languages;
 
-    public Programmer(long id,String name, int years, double salary, Department department, List<Languages> languages) {
+    public Programmer(long id,String name, int years, double salary, long department, List<String> languages) {
         this.id = id;
         this.name = name;
         this.years = years;
@@ -43,13 +43,13 @@ public class Programmer {
 
     public void setSalary(double salary) {this.salary = salary;}
 
-    public Department getDepartment() {
+    public long getDepartment() {
         return department;
     }
 
-    public void setDepartment(Department department) { this.department = department;}
+    public void setDepartment(long department) { this.department = department;}
 
-    public List<Languages> getLanguages() { return languages;}
+    public List<String> getLanguages() { return languages;}
 
-    public void setLanguages(List<Languages> languages) { this.languages = languages;}
+    public void setLanguages(List<String> languages) { this.languages = languages;}
 }
